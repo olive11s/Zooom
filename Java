@@ -1,0 +1,76 @@
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = 400; canvas.height = 400;
+
+let score = 0;
+let timeLeft = 60;
+let player = { x: 200, y: 200, size: 30, holding: null };
+let stations = {
+    bin: { x: 20, y: 20, color: '#ff4757', label: 'Tomato' },
+    board: { x: 180, y: 20, color: '#95a5a6', label: 'Chop', progress: 0 },
+    stove: { x: 340, y: 20, color: '#e67e22', label: 'Cook', progress: 0, status: 'off' },
+    trash: { x: 20, y: 340, color: '#2c3e50', label: 'Trash' },
+    delivery: { x: 340, y: 340, color: '#27ae60', label: 'Serve' }
+};
+
+function draw() {
+    ctx.clearRect(0, 0, 400, 400);
+    for (let s in stations) {
+        let st = stations[s];
+        ctx.fillStyle = st.color;
+        ctx.fillRect(st.x, st.y, 45, 45);
+        ctx.fillStyle = "black";
+        ctx.fillText(st.label, st.x, st.y - 5);
+        if (st.progress > 0) ctx.fillRect(st.x, st.y + 50, st.progress * 4, 5);
+    }
+    ctx.fillStyle = '#3498db';
+    ctx.fillRect(player.x, player.y, player.size, player.size);
+    if (player.holding) ctx.fillText("📦 " + player.holding, player.x - 5, player.y - 10);
+}
+
+function move(dx, dy) {
+    player.x = Math.max(0, Math.min(370, player.x + (dx * 30)));
+    player.y = Math.max(0, Math.min(370, player.y + (dy * 30)));
+    draw();
+}
+
+function interact() {
+    for (let s in stations) {
+        let st = stations[s];
+        if (Math.hypot(player.x - st.x, player.y - st.y) < 50) {
+            // LOGIC: BIN
+            if (s === 'bin' && !player.holding) player.holding = 'Tomato';
+            // LOGIC: CHOPPING BOARD
+            if (s === 'board' && player.holding === 'Tomato') {
+                st.progress += 25; 
+                if (st.progress >= 100) { player.holding = 'Chopped Tomato'; st.progress = 0; }
+            }
+            // LOGIC: STOVE
+            if (s === 'stove' && player.holding === 'Chopped Tomato' && st.status === 'off') {
+                player.holding = null; st.status = 'cooking';
+            }
+            if (s === 'stove' && st.status === 'ready') {
+                player.holding = 'Soup'; st.status = 'off'; st.progress = 0;
+            }
+            // LOGIC: DELIVERY
+            if (s === 'delivery' && player.holding === 'Soup') {
+                score += 50; player.holding = null;
+                document.getElementById('score').innerText = score;
+            }
+            // LOGIC: TRASH
+            if (s === 'trash') player.holding = null;
+        }
+    }
+    draw();
+}
+
+// Cooking loop
+setInterval(() => {
+    if (stations.stove.status === 'cooking') {
+        stations.stove.progress += 10;
+        if (stations.stove.progress >= 100) stations.stove.status = 'ready';
+    }
+    draw();
+}, 500);
+
+draw();
