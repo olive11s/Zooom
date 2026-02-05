@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="style.css">
+    <title>Cooking Engine</title>
+</head>
+<body>
+    <div id="ui">
+        <span>Score: <b id="score">0</b></span>
+        <span>Time: <b id="timer">60</b></span>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <div id="controls">
+        <button onpointerdown="move(0,-1)">UP</button>
+        <div class="side-btns">
+            <button onpointerdown="move(-1,0)">LEFT</button>
+            <button id="actionBtn" onpointerdown="interact()">ACTION</button>
+            <button onpointerdown="move(1,0)">RIGHT</button>
+        </div>
+        <button onpointerdown="move(0,1)">DOWN</button>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
